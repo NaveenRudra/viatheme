@@ -1,0 +1,36 @@
+{%- comment -%}
+  Swatch Colors
+  --------------------------------
+  In most cases the theme will convert color variant names into CSS colors that will work automatically.
+  For example, the variant Color: "Light Blue" will be converted to a valid CSS color lightblue
+  https://htmlcolorcodes.com/color-names/
+
+  The swatches will convert your shop's color names to:
+  - Lowercase
+  - Remove any spaces
+
+  Color: "Red and White" would become "redandwhite"
+{%- endcomment -%}
+
+{%- comment -%}
+  Custom Color Names
+  --------------------------------
+  It is possible to add in custom color names or even overwrite the color HEX value of an existing CSS color.
+  Use the following examples as a guide to create custom colors
+    - Custom color name must begin with "swatch_color_"
+    - Add the name of the product variant color all lowercase and without spaces
+    - Adding an existing CSS color name to the end of "swatch_color_" overwrites the default CSS color
+  
+  The following examples are for:
+    - Butter Yellow
+    - Grape
+    - Navy (overwriting the default #000080 value of the CSS color 'navy')
+{%- endcomment -%}
+{%- assign swatch_color_butteryellow = '#F3EF7D' -%}
+{%- assign swatch_color_grape = '#5F5387' -%}
+{%- assign swatch_color_navy = '#0d0d73' -%}
+
+{%- comment -%}
+  List of valid CSS color names
+{%- endcomment -%}
+{%- assign css_color_names = 'aliceblue, antiquewhite, aqua, aquamarine, azure, beige, bisque, black, blanchedalmond, blue, blueviolet, brown, burlywood, cadetblue, chartreuse, chocolate, coral, cornflowerblue, cornsilk, crimson, cyan, darkblue, darkcyan, darkgoldenrod, darkgray, darkgreen, darkkhaki, darkmagenta, darkolivegreen, darkorange, darkorchid, darkred, darksalmon, darkseagreen, darkslateblue, darkslategray, darkturquoise, darkviolet, deeppink, deepskyblue, dimgray, dodgerblue, firebrick, floralwhite, forestgreen, fuchsia, gainsboro, ghostwhite, gold, goldenrod, gray, green, greenyellow, honeydew, hotpink, indianred, indigo, ivory, khaki, lavender, lavenderblush, lawngreen, lemonchiffon, lightblue, lightcoral, lightcyan, lightgoldenrodyellow, lightgreen, lightgrey, lightpink, lightsalmon, lightseagreen, lightskyblue, lightslategray, lightsteelblue, lightyellow, lime, limegreen, linen, magenta, maroon, mediumauqamarine, mediumblue, mediumorchid, mediumpurple, mediumseagreen, mediumslateblue, mediumspringgreen, mediumturquoise, mediumvioletred, midnightblue, mintcream, mistyrose, moccasin, navajowhite, navy, oldlace, olive, olivedrab, orange, orangered, orchid, palegoldenrod, palegreen, paleturquoise, palevioletred, papayawhip, peachpuff, peru, pink, plum, powderblue, purple, red, rosybrown, royalblue, saddlebrown, salmon, sandybrown, seagreen, seashell, sienna, silver, skyblue, slateblue, slategray, snow, springgreen, steelblue, tan, teal, thistle, tomato, turquoise, violet, wheat, white, whitesmoke, yellow, yellowgreen' | split: ', ' -%}

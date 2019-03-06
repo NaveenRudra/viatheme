@@ -1,0 +1,25 @@
+<div class="ct-section-wrapper">
+  <div class="simple-collection">
+    <div class="product-block-container" {{ block.shopify_attributes }}>
+      <header>
+        <h4>Related products</h4>
+      </header>
+      <div class="block-container">
+        {% include 'related-products' %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "Section name",
+    "settings": []
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

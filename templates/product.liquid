@@ -1,0 +1,75 @@
+{% comment %}
+  The contents of the product.liquid template are pieced together with several "sections". 
+   - The native District code is in "sections/product-template.liquid"
+   - The Cranktank code is in various sections labeled depending on the product
+   - The related products feature is in "sections/ct-related-products" the original code is commentet out in the district template
+{% endcomment %}
+
+{% section 'product-template' %}
+{% section 'ct-related-products' %}
+
+<!--Start Stamped.io Auto Installation-->
+<div id="stamped-main-widget" class="stamped-main-widget" data-widget-style="standard" data-product-id="{{ product.id }}" data-name="{{ product.title | escape }}" data-url="{{ shop.url }}{{ product.url }}" data-image-url="{{ product.featured_image | product_img_url: "large" |replace: '?', '%3F' | replace: '&','%26'}}" data-description="{{ product.description | escape }}" data-product-sku="{{product.handle}}">{{ product.metafields.stamped.reviews }}</div><!--End Stamped.io Auto Installation-->
+
+
+<script>
+function openTab(evt, tabName) {
+  <!--initiating Vars-->
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("ct-tab-content");
+  tablinks = document.getElementsByClassName("tablinks");
+
+  <!--Hiding all the content by default before moving forward-->
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+                                    
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  <!--Displaying the desired block-->
+  document.getElementById(tabName).style.display = "block";
+
+  <!--appending active to the class to display the right css-->
+  evt.currentTarget.className += " active";
+}
+  
+  
+function openTabMob(evt, tabName) {
+  <!--initiating Vars-->
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("ct-tab-content");
+  tablinks = document.getElementsByClassName("tablinks-mobile");
+
+  <!--Hiding all the content by default before moving forward-->
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+                                    
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  <!--Displaying the desired block-->
+  document.getElementById(tabName).style.display = "block";
+
+  <!--appending active to the class to display the right css-->
+  evt.currentTarget.className += " active";
+}
+
+<!--Functions to display more or less content on the Build Specs-->
+function displayLess(evt, short, long){
+    document.getElementById(short).style.display = "table";
+    document.getElementById(long).style.display = "none";
+    document.getElementById('show-more-button').style.display = "block";
+    document.getElementById('show-less-button').style.display = "none";
+}
+
+function displayMore(evt, short, long){
+    document.getElementById(short).style.display = "none";
+    document.getElementById(long).style.display = "table";
+    document.getElementById('show-more-button').style.display = "none";
+    document.getElementById('show-less-button').style.display = "block";
+}
+</script>

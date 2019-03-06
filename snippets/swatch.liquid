@@ -1,0 +1,130 @@
+{%- assign option_name = option.name | downcase -%}
+{%- assign color_options = 'products.product.color_option' | t -%}
+{%- assign size_options = 'products.product.size_option' | t -%}
+{%- assign current_option = 'option' | append: option.position -%}
+{%- assign all_options = 'option1, option2, option3' | remove: current_option | split: ', ' -%}
+
+<div class="radio-wrapper js product-form__item" data-option-index="{{ option.position }}" data-other-options='{{ other_options | json }}'>
+  <label class="single-option-radio__label"
+    for="SingleOptionRadioSelector-option-{{ forloop.index0 }}">
+    {{ option.name }}
+    {%- if section.settings.variant_style == 'swatches' and color_options == option_name -%}
+    <span class="single-option-radio__label--value label-extra">{{ option.selected_value }}</span>
+    {%- endif -%}
+    {%- if section.settings.size_guide_page != blank and size_options == option_name -%}
+    <span class="label-extra"><a href="{{ pages[section.settings.size_guide_page].url }}" class="product-size-guide-{{ section.id }}">{{ pages[section.settings.size_guide_page].title }}</a></span>
+    {%- endif -%}
+  </label>
+  <fieldset class="single-option-radio"
+    name="{{ option.name }}"
+    id="SingleOptionRadioSelector-option-{{ forloop.index0 }}">
+      {%- assign option_index = forloop.index -%}
+      {%- for value in option.values -%}
+
+        {%- comment -%}
+          Radio identifier (a11y) and class (js)
+        {%- endcomment -%}
+        {%- capture id -%}ProductRadioSelect-option-{{ option.name }}-{{ value | escape }}-{{ section.id }}{%- endcapture -%}
+        {%- capture class -%}single-option-selector__radio single-option-selector-{{ section.id }}{%- endcapture -%}
+
+        {%- if color_options == option_name -%}
+          {%- comment -%}
+            CSS color and image swatches
+          {%- endcomment -%} 
+          {%- assign swatch_image_url = value | handle | append: '.png' -%}
+          {%- assign swatch_image_url_1x = swatch_image_url | asset_img_url: '1x' -%}
+          {%- assign swatch_image_url_20x = swatch_image_url | asset_img_url: '20x' -%}
+          {%- assign swatch_image_url_40x = swatch_image_url | asset_img_url: '40x' -%}
+          {%- assign swatch_image_url_80x = swatch_image_url | asset_img_url: '80x' -%}
+          {%- assign swatch_color = value | handle | replace: '-', '' -%}
+
+          {% include 'swatch-colors' %}
+
+          {%- comment -%}
+            Check to see if the color exists
+              1) Custom color
+              2) CSS color name
+              3) Fallback to default gray in CSS
+          {%- endcomment -%}
+          {%- assign custom_color_var = 'swatch_color_' | append: swatch_color -%}
+          {%- capture custom_color -%}{{ [custom_color_var] }}{%- endcapture -%}
+
+          {%- if custom_color != blank -%}
+            {%- assign swatch_css_color = custom_color -%}
+          {%- elsif css_color_names contains swatch_color -%}
+            {%- assign swatch_css_color = swatch_color -%}
+          {%- else -%}
+            {%- assign swatch_css_color = false -%}
+          {%- endif -%}
+
+        {%- endif -%}
+
+        {%- comment -%}
+          Check for availability
+          - Set to false as default, then pass through multiple checks
+        {%- endcomment -%}
+        {%- assign available = false -%}
+        {%- for variant in product.variants -%}
+          {%- unless variant.available -%}
+            {%- continue -%}
+          {%- endunless -%}
+          
+          {%- unless variant[current_option] == value -%}
+            {%- continue -%}
+          {%- endunless -%}
+
+          {%- unless variant[all_options[0]] == current_variant[all_options[0]] -%}
+            {%- continue -%}
+          {%- endunless -%}
+
+          {%- unless variant[all_options[1]] == current_variant[all_options[1]] -%}
+            {%- continue -%}
+          {%- endunless -%}
+
+          {%- assign available = true -%}
+        {%- endfor -%}
+
+        {%- assign checked = '' -%}
+
+        {%- if current_variant[current_option] == value -%}
+          {%- assign checked = 'checked="checked"' -%}
+        {%- endif -%}
+
+        {%- capture radio -%}
+          <input type="radio" {{ checked }}
+            value="{{ value | escape }}"
+            data-index="option{{ option_index }}"
+            data-position="{{ option.position }}"
+            name="{{ option.name }}"
+            class="{{ class }}"
+            id="{{ id }}">
+        {%- endcapture -%}
+
+        {%- if section.settings.variant_style == 'swatches' and color_options == option_name -%}
+          <div class="swatch-container color {{ section.settings.variant_swatch_shape }} {% unless option_index == 1 %}{% unless available %}soldout{% endunless %}{% endunless %}">
+            {{ radio }}
+            <label
+              for="{{ id }}"
+              title="{{ value | escape }}" class="swatch-label--color">
+             <span class="swatch--swatch lazyload"
+              style="{% if swatch_css_color %}background-color: {{ swatch_css_color }}; {% endif %}{% if section.settings.variant_swatch_images %}background-image: url({{ swatch_image_url_1x }});{% endif %}"
+              {% if section.settings.variant_swatch_images %}data-bgset="{{ swatch_image_url_20x }} 20w, {{ swatch_image_url_40x }} 40w, {{ swatch_image_url_80x }} 80w"{% endif %}></span>
+             <span class="swatch--text">{{ value | escape }}</span>
+              {% include 'icon-ui-soldout' %}
+            </label>
+          </div>
+        {%- else -%}
+          <div class="swatch-container {% unless option_index == 1 %}{% unless available %}soldout{% endunless %}{% endunless %}">
+            {{ radio }}
+            <label
+              for="{{ id }}"
+              title="{{ value | escape }}">
+              <span class="swatch--text">{{ value | escape }}</span>
+              {% include 'icon-ui-soldout' %}
+            </label>
+          </div>
+        {%- endif -%}
+        
+      {%- endfor -%}
+  </fieldset>
+</div>

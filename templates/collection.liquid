@@ -1,0 +1,18 @@
+{% include 'shogun-products', content: collection %}
+{{collection.metafields.shogun.above}}
+{% comment %}
+  The contents of the collection.liquid template can be found in /sections/collection-template.liquid
+{% endcomment %}
+
+
+{% if handle contains 'all' %}
+	{% section 'collection-template-ct-header' %}
+{% else %}
+	{% section 'collection-template' %}
+{% endif %}
+
+
+
+
+{{collection.metafields.shogun.below}}
+

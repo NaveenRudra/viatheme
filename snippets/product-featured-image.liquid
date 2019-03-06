@@ -1,0 +1,80 @@
+<div class="featured {% if product.images.size == 1 %}full-width{% endif %}" id="ProductPhoto-{{ section.id }}" data-ProductPhoto>
+  <div class="product-image--slider" id="ProductImageSlider-{{ section.id }}" 
+    data-zoom="{{ section.settings.product_featured_zoom_enable }}" 
+    data-lightbox="{{ section.settings.product_featured_lightbox_enable }}"
+    data-show-arrows="{{ section.settings.show_arrows }}"
+    data-slider-enabled="{{ section.settings.enable_image_slider }}" 
+    data-flickity-options='{
+      "adaptiveHeight": true,
+      "imagesLoaded": true,
+      "lazyLoad": true,
+      "wrapAround": true,
+      "fullscreen": true,
+      {% if product.images.size == 1 %}
+      "pageDots": false,
+      {% else %}
+      "pageDots": {{ section.settings.show_dots }},
+      {% endif %}
+      "prevNextButtons": true,
+      "selectedAttraction": 0.15,
+      "friction": 0.8
+    }'
+    data-ProductImageSlider>
+    {%- for image in product.images -%}
+      {%- assign image_width = image.width | append: 'x' -%}
+      {%- assign image_highresolution = image | img_url: image_width -%}
+      {%- assign active_image = current_variant.featured_image | default: product.featured_image -%}
+      <div class="product-image--cell" data-image-id="{{ image.id }}" {% if image == active_image %}data-initial-image{% endif %}>
+        <div id="ProductImageCellContainer-{{ image.id }}">
+          <a href="{{ image_highresolution }}" id="CardImageContainer-{{ image.id }}" class="card__image-container" target="_blank">
+            {%- assign image_widths = '85,100,200,295,394,590,720,800,1200' -%}
+            {%- include 'theme-rias' -%}
+            <img id="ProductImage-{{ section.id }}-{{ image.id }}" class="lazyload"
+              {%- if image == active_image -%}
+              src="{{ image | img_url: '394x' }}"
+              {%- else -%}
+              src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+              {%- endif -%}
+              data-id="{{ image.id }}"
+              data-section-id="{{ section.id }}"
+              data-src="{{ image_url_pattern }}"
+              data-widths="[{{ image_widths }}]"
+              data-aspectratio="{{ image.aspect_ratio }}"
+              data-sizes="auto"
+              data-position="{{ image.position | minus: 1 }}"
+              data-max-width="{{ image.width }}"
+              alt="{{ image.alt | escape }}">
+            <noscript>
+              <img src="{{ image | img_url: '590x' }}" alt="{{ image.alt | escape }}">
+            </noscript>
+            {% assign height = image.height | plus: 0 %}
+            {% assign width = image.width | plus: 0 %}
+            {% assign padding_ratio = height | times: 100 | divided_by: width %}
+            <style>
+              .product-image--slider:not(.is-fullscreen) #ProductImageCellContainer-{{ image.id }} {
+                width: 100%;
+                max-width: {{ width }}px;
+              }
+              .product-image--slider:not(.is-fullscreen) #CardImageContainer-{{ image.id }} {
+                position: relative;
+                height: 0;
+                padding-bottom: {{ padding_ratio }}%;
+              }
+              .product-image--slider:not(.is-fullscreen) #CardImageContainer-{{ image.id }} img {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+              }
+              .product-image--slider.is-fullscreen #CardImageContainer-{{ image.id }} img {
+                height: {{ height }}px;
+                width: {{ width }}px;
+              }
+            </style>
+          </a>
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>

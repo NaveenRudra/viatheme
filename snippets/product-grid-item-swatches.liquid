@@ -1,0 +1,90 @@
+{%- for option in product.options_with_values -%}
+  {%- assign option_name = option.name | downcase -%}
+  {%- assign color_options = 'products.product.color_option' | t -%}
+  {%- if color_options == option_name -%}
+    {%- assign color_option_position = 'option' | append: option.position -%}
+
+    <ul class="product-swatches product-swatches--{{ settings.collection_swatches_shape }}">        
+      {%- for value in option.values -%}
+
+        {%- comment -%}
+          CSS color and image swatches
+        {%- endcomment -%}
+        {%- if settings.collection_swatches_images -%}
+          {%- assign swatch_image_url = value | handle | append: '.png' -%}
+          {%- assign swatch_image_url_1x = swatch_image_url | asset_img_url: '1x' -%}
+          {%- assign swatch_image_url_20x = swatch_image_url | asset_img_url: '20x' -%}
+          {%- assign swatch_image_url_40x = swatch_image_url | asset_img_url: '40x' -%}
+          {%- assign swatch_image_url_80x = swatch_image_url | asset_img_url: '80x' -%}
+        {%- endif -%}
+        {%- assign swatch_color = value | handle | replace: '-', '' -%}
+
+        {% include 'swatch-colors' %}
+
+        {%- comment -%}
+          Check to see if the color exists
+            1) Custom color
+            2) CSS color name
+            3) Fallback to default gray in CSS
+        {%- endcomment -%}
+        {%- assign custom_color_var = 'swatch_color_' | append: swatch_color -%}
+        {%- capture custom_color -%}{{ [custom_color_var] }}{%- endcapture -%}
+
+        {%- if custom_color != blank -%}
+          {%- assign swatch_css_color = custom_color -%}
+        {%- elsif css_color_names contains swatch_color -%}
+          {%- assign swatch_css_color = swatch_color -%}
+        {%- else -%}
+          {%- assign swatch_css_color = 'gray' -%}
+        {%- endif -%}
+
+        {%- comment -%}
+          Get a variant image and ID associated with the color
+          Loop through variants looking for a match and break after
+          - image for previews
+          - id for direct variant links
+          - Assign to null initially for possible empty values
+        {%- endcomment -%}
+        {%- assign color_variant_id = '' -%}
+        {%- assign color_variant_url = '' -%}
+        {%- assign color_variant_image = '' -%}
+        {%- assign color_variant_image_pattern = '' -%}
+        {%- for variant in product.variants -%}
+          {%- if variant[color_option_position] == value -%}
+            {%- assign color_variant_id = variant.id -%}
+            {%- assign color_variant_url = variant.url -%}
+            {%- if variant.image -%}
+              {%- assign color_variant_image = variant.image | img_url: '295x' -%}
+              {%- assign color_variant_image_pattern = variant.image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' -%}
+            {%- endif -%}
+            {% break %}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- capture swatch_url -%}
+          {%- if color_variant_url == '' -%}
+            {{ product.url | within: collection }}
+          {%- else -%}
+            {{ color_variant_url | within: collection }}
+          {%- endif -%}
+        {%- endcapture -%}
+        <li class="product-swatches__li">
+          <a href="{{ swatch_url | strip }}" 
+            class="product-swatches__link {% if option.selected_value == value %}product-swatches__link--selected{% endif %}"
+            aria-label="{{ value | escape }}"
+            title="{{ value | escape }}"
+            data-variant-id="{{ color_variant_id }}"
+            data-variant-url="{{ swatch_url | strip }}"
+            data-variant-image="{{ color_variant_image }}"
+            data-variant-image-pattern="{{ color_variant_image_pattern }}">
+            <div class="product-swatches__color lazyload" {%- if settings.collection_swatches_images -%}data-bgset="{{ swatch_image_url_20x }} 20w, {{ swatch_image_url_40x }} 40w, {{ swatch_image_url_80x }} 80w"{%- endif -%} style="background-color: {{ swatch_css_color }}; {%- if settings.collection_swatches_images -%}background-image: url({{ swatch_image_url_1x }});{%- endif -%}">
+              <span class="product-swatches__label">{{ value | escape }}</span>
+            </div>
+          </a>
+        </li>
+
+      {%- endfor -%}
+    </ul>
+
+  {%- endif -%}
+{%- endfor -%}

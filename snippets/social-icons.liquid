@@ -1,0 +1,15 @@
+{%- assign social_icons = 'Twitter,Facebook,Instagram,Pinterest,Tumblr,YouTube,Snapchat,Spotify,Google Plus,Medium,LinkedIn,Amazon' | split: ',' -%}
+<ul class="social-icons"> 
+  {%- for icon in social_icons -%}
+    {%- assign icon_var = icon | downcase | replace: ' ', '' -%}
+    {%- assign icon_include = 'icon-social-' | append: icon_var -%}
+    {%- assign icon_url = 'social_' | append: icon_var | append: '_link' -%}
+    {%- if settings[icon_url] != blank -%}
+      <li>
+        <a href="{{ settings[icon_url] }}" title="{{ icon }} - {{ shop.name }}">
+          {% include icon_include %}
+        </a>
+      </li>
+    {%- endif -%}
+  {%- endfor -%}
+</ul>

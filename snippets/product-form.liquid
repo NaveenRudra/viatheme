@@ -1,0 +1,132 @@
+{% form 'product', product %}
+  <div class="product-title">
+    <h1 itemprop="name">
+      {% unless section_onboarding %}
+        {{ product.title }}
+      {% else %}
+        {{ 'homepage.onboarding.product_title' | t }}
+      {% endunless %}
+    </h1>
+    {% if section.settings.show_vendors %}
+      <span class="vendor">
+        {% unless section_onboarding %}
+          {{ product.vendor | link_to_vendor }}
+        {% else %}
+          {{ 'homepage.onboarding.product_vendor' | t }}
+        {% endunless %}
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="selection-wrapper price product-single__price-{{ section.id }}">
+    {% unless section_onboarding %}
+      <span class="money" id="ProductPrice-{{ section.id }}" data-ProductPrice itemprop="price" content="{{ current_variant.price | money_without_currency | remove: ',' }}">{{ current_variant.price | money }}</span>
+    {% else %}
+      <span class="money" id="ProductPrice-{{ section.id }}" data-ProductPrice itemprop="price" content="{{ 1999 | money_without_currency | remove: ',' }}">{{ 1999 | money }}</span>
+    {% endunless %}
+    
+    {% if current_variant.compare_at_price > current_variant.price %}
+      <p id="ComparePrice-{{ section.id }}" data-ComparePrice style="display:block;">
+        {{ 'products.product.compare_at' | t }} <span class="money">{{ current_variant.compare_at_price | money }}</span>
+      </p>
+    {% else %}
+      <p id="ComparePrice-{{ section.id }}" data-ComparePrice style="display:none;">
+        {{ 'products.product.compare_at' | t }} <span class="money">{{ current_variant.compare_at_price | money }}</span>
+      </p>
+    {% endif %}
+  </div>
+
+  {% unless product.has_only_default_variant %}
+    {%- comment -%}
+      Dropdown colleciton of variant options
+    {%- endcomment -%}
+    {%- if section.settings.variant_style == 'dropdowns' -%}
+      <div class="selection-wrapper variant js">
+        <div class="variant-grid">
+          {% for option in product.options_with_values %}
+            {%- assign option_name = option.name | downcase -%}
+            {%- assign size_options = 'products.product.size_option' | t -%}
+            <div class="selector-wrapper">
+              <label for="SingleOptionSelector-{{ forloop.index0 }}">
+                {{ option.name }}
+                {%- if section.settings.size_guide_page != blank and size_options contains option_name -%}
+                <span class="label-extra"><a href="{{ pages[section.settings.size_guide_page].url }}" class="product-size-guide-{{ section.id }}">{{ pages[section.settings.size_guide_page].title }}</a></span>
+                {%- endif -%}
+              </label>
+
+              <select class="single-option-selector single-option-selector-{{ section.id }}" id="SingleOptionSelector-{{ section.id }}-{{ forloop.index0 }}" data-name="{{ option.name }}" data-index="option{{ forloop.index }}">
+                {% for value in option.values %}
+                  <option value="{{ value | escape }}" {% if option.selected_value == value %}selected="selected"{% endif %}>
+                    {{ value }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
+          {% if section.settings.product_quantity_enable %}
+            {% include 'quantity-selector' %}
+          {% endif %}
+        </div>
+      </div>
+    {%- comment -%}
+      Button/swatch colleciton of variant options
+    {%- endcomment -%}
+    {%- elsif section.settings.variant_style == 'buttons' or section.settings.variant_style == 'swatches' -%}
+      <div class="selection-wrapper variant radio js">
+        {% for option in product.options_with_values %}
+          {% include 'swatch' %}
+        {% endfor %}
+        {% if section.settings.product_quantity_enable %}
+          {% include 'quantity-selector' %}
+        {% endif %}
+      </div>
+    {%- endif -%}
+  {% else %}
+    {% if section.settings.product_quantity_enable %}
+      <div class="selection-wrapper variant js">
+        {% include 'quantity-selector' %}
+      </div>
+    {% else %}
+      {%- assign cart_buttons_margin = 'cart_buttons__margin' -%}
+    {% endif %}
+  {% endunless %}
+  
+  {% comment %}
+    Primary variant select controlled JS
+  {% endcomment %}
+  <div class="selection-wrapper variant no-js">
+    <div class="selector-wrapper full-width">
+      <select name="id" id="ProductSelect-{{ section.id }}" data-section="{{ section.id }}" class="product-form__variants no-js">
+        {% for variant in product.variants %}
+          {% if variant.available %}
+            <option {% if variant == product.selected_or_first_available_variant %} selected="selected" {% endif %} value="{{ variant.id }}" data-sku="{{ variant.sku }}">
+              {{ variant.title }} - {{ variant.price | money_with_currency }}
+            </option>
+          {% else %}
+            <option disabled="disabled">{{ variant.title }} - {{ 'products.product.sold_out' | t }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="error cart-error cart-error-{{ section.id }}" style="display:none;"></div>
+  <div id="CartButtons-{{ section.id }}" class="cart-buttons {% if cart_buttons_margin %}{{ cart_buttons_margin }}{% endif %} {% if section.settings.show_payment_button and current_variant.available %}cart-buttons__enabled{% elsif section_onboarding %}cart-buttons__enabled{% endif %}">
+    <div class="button-wrapper default-cart-button">
+      <button type="submit" name="add" id="AddToCart-{{ section.id }}" data-AddToCart class="default-cart-button__button {% unless current_variant.available or section_onboarding %}disabled{% endunless %}" {% unless current_variant.available %}disabled{% endunless %}>
+        <span id="AddToCartText-{{ section.id }}" data-AddToCartText>
+          {% unless current_variant.available or section_onboarding %}
+            {{ 'products.product.sold_out' | t }}
+          {% else %}
+            {{ 'products.product.add_to_cart' | t }}
+          {% endunless %}
+        </span>
+      </button>
+    </div>
+    <div id="PaymentButtonContainer-{{ section.id }}" class="payment-button__container">
+      {% if section.settings.show_payment_button %}
+        {{ form | payment_button }}
+      {% endif %}
+    </div>
+  </div>
+{% endform %}

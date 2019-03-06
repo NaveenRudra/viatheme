@@ -1,0 +1,14 @@
+<div class="selector-wrapper quantity quantity-{{ section.id }}" {% unless current_variant.available or section_onboarding %}style="display:none;"{% endunless %}>
+  <label for="Quantity">{{ 'products.product.quantity' | t }}</label>
+  <div class="quantity-select quantity-select-{{ section.id }}">
+    <div class="button-wrapper">
+      <button class="adjust adjust-minus">-</button>
+    </div>
+    <div class="input-wrapper">
+      <input type="text" class="quantity" value="1" min="1" pattern="[0-9]*" name="quantity" id="Quantity-{{ section.id }}" data-Quantity>
+    </div>
+    <div class="button-wrapper">
+      <button class="adjust adjust-plus">+</button>
+    </div>
+  </div>
+</div>

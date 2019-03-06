@@ -1,0 +1,218 @@
+{% comment %}
+  The contents of the product.liquid template are pieced together with several "sections". 
+   - The native District code is in "sections/product-template.liquid"
+   - The Cranktank code is in various sections labeled depending on the product
+   - The related products feature is in "sections/ct-related-products" the original code is commentet out in the district template
+{% endcomment %}
+
+{% section 'product-template' %}
+{% if product.title == 'G.1 | Frameset' %}
+	{% section 'ct-g1-frameset-product-addition' %}
+{% elsif product.title == 'G.1 | 105' %}
+	{% section 'ct-g1-105-product-addition' %}
+{% elsif product.title == 'G.1 | Ultegra' %}
+	{% section 'ct-g1-ultegra-product-addition' %}
+{% elsif product.title == 'G.1 | Force 1' %}
+	{% section 'ct-g1-force-1-product-addition' %}
+{% endif %}
+{% section 'ct-related-products' %}
+
+<!--Start Stamped.io Auto Installation-->
+<div id="stamped-main-widget" class="stamped-main-widget" data-widget-style="standard" data-product-id="{{ product.id }}" data-name="{{ product.title | escape }}" data-url="{{ shop.url }}{{ product.url }}" data-image-url="{{ product.featured_image | product_img_url: "large" |replace: '?', '%3F' | replace: '&','%26'}}" data-description="{{ product.description | escape }}" data-product-sku="{{product.handle}}">{{ product.metafields.stamped.reviews }}</div><!--End Stamped.io Auto Installation-->
+
+<style>
+  /*Styles for black buttons and whatnot before they approve the color scheme*/
+  button.shopify-payment-button__button.shopify-payment-button__button--unbranded.w4mq5tn33DxzvW8TZcZbp._1MC6K5o3MNX5QpV5MpvKyl{
+    background-color: #0C0C0C;
+  }
+  button.shopify-payment-button__button.shopify-payment-button__button--unbranded.w4mq5tn33DxzvW8TZcZbp._1MC6K5o3MNX5QpV5MpvKyl:hover{
+    background-color: #232323;
+  }
+
+  .cart-buttons__enabled .default-cart-button__button{
+    color: #0C0C0C;
+    border: 2px solid #0C0C0C;
+  }
+  .cart-buttons__enabled .default-cart-button__button:hover{
+    color: #232323;
+    border: 2px solid #232323;
+  }
+  span#ProductPrice-product-template{
+    color: #171717;
+  }
+  /* TURNING THE BUTTONS AND WHATNOT THE GRAVEL COLOR
+  button.shopify-payment-button__button.shopify-payment-button__button--unbranded.w4mq5tn33DxzvW8TZcZbp._1MC6K5o3MNX5QpV5MpvKyl{
+    background-color: #bf4e0f;
+  }
+  
+  button.shopify-payment-button__button.shopify-payment-button__button--unbranded.w4mq5tn33DxzvW8TZcZbp._1MC6K5o3MNX5QpV5MpvKyl:hover{
+    background-color: #9D400D;
+  }
+  
+  .cart-buttons__enabled .default-cart-button__button{
+    color: #bf4e0f;
+    border: 2px solid #bf4e0f;
+  }
+  .cart-buttons__enabled .default-cart-button__button:hover{
+    color: #9D400D;
+    border: 2px solid #9D400D;
+  }
+  
+  span#ProductPrice-product-template{
+    color: #bf4e0f;
+  }
+  */
+
+  button.active{
+    background-color:#b74411;
+    border: 2px solid #b74411;
+    color: #fff;
+  }
+  button.tablinks:hover{
+    background-color:#C45E24;
+    border: 2px solid #C45E24;
+    color:#fff;
+  }
+  button.tablinks-mobile:hover{
+    background-color:#C45E24;
+    border: 2px solid #C45E24;
+    color: #fff;
+  }
+
+  .ct-tab-content{
+    border-left: 5px solid #b74411;
+    border-top: 5px solid #b74411;
+  }
+  
+  .geom-table-icon{
+    background-color:#b74411;
+  }
+  
+  @media only screen and (min-device-width : 320px) and (max-device-width : 768px) {
+    button.tablinks-mobile{
+      background-color:#fff;
+      border:2px solid #fff;
+      display:inline-block;
+      font-size: .75em!important;
+      -webkit-transition: 1s; /* Safari */
+      transition: 1s;
+    }
+    button.tablinks-mobile.active{
+      background-color:#b74411;
+      border:2px solid #b74411;
+      display:inline-block;
+      font-size: .75em!important;
+      -webkit-transition: 1s; /* Safari */
+      transition: 1s;
+    }
+  }
+</style>
+
+
+<script>
+  <!-- Fancy hover-over effect -->
+    function surface(imgId, allId, geomIcon, rowId){
+      document.getElementById(imgId).style.display = "inline";
+      document.getElementById("ct-g-grey").style.display = "inline";
+      document.getElementById(allId).style.display = "none";
+      document.getElementById(geomIcon).style.backgroundColor = "#b74203";
+      document.getElementById(rowId).style.backgroundColor = "#E8C9BE";
+      document.getElementById(rowId).style.cursor = "help";
+    }
+
+    function hide(imgId, allId, rowId, oddeven){
+      document.getElementById(allId).style.display = "inline";
+      document.getElementById(imgId).style.display = "none";
+      document.getElementById("ct-g-grey").style.display = "none";
+      if(oddeven == "odd"){
+        document.getElementById(rowId).style.backgroundColor = "#fff";
+      } else {
+        document.getElementById(rowId).style.backgroundColor = "#f8f8f8";
+      }
+      
+    }
+  
+  
+function openTab(evt, tabName) {
+  <!--initiating Vars-->
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("ct-tab-content");
+  tablinks = document.getElementsByClassName("tablinks");
+
+  <!--Hiding all the content by default before moving forward-->
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+                                    
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  <!--Displaying the desired block-->
+  document.getElementById(tabName).style.display = "block";
+
+  <!--??-->
+  evt.currentTarget.className += " active";
+}
+    
+  
+function openTabMob(evt, tabName) {
+  <!--initiating Vars-->
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("ct-tab-content");
+  tablinks = document.getElementsByClassName("tablinks-mobile");
+
+  <!--Hiding all the content by default before moving forward-->
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+                                    
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  <!--Displaying the desired block-->
+  document.getElementById(tabName).style.display = "block";
+
+  <!--appending active to the class to display the right css-->
+  evt.currentTarget.className += " active";
+}
+
+<!--Functions to display more or less content on the Build Specs-->
+function displayLess(evt, short, long){
+    document.getElementById(short).style.display = "table";
+    document.getElementById(long).style.display = "none";
+    document.getElementById('show-more-button').style.display = "block";
+    document.getElementById('show-less-button').style.display = "none";
+}
+
+function displayMore(evt, short, long){
+    document.getElementById(short).style.display = "none";
+    document.getElementById(long).style.display = "table";
+    document.getElementById('show-more-button').style.display = "none";
+    document.getElementById('show-less-button').style.display = "block";
+}
+
+  
+<!--Function to display the geometric chart-->
+function displayGeom(evt, img, less, more){
+  document.getElementById(img).style.display = "block";
+  document.getElementById(less).style.display = "block";
+  document.getElementById(more).style.display = "none";
+  var x = document.getElementsByClassName('geom-table-icon');
+  for(var i = 0; i < x.length; i++){
+    x[i].style.display = "inline-block";
+  }
+}
+  
+function hideGeom(evt, img, less, more){
+  document.getElementById(img).style.display = "none";
+  document.getElementById(less).style.display = "none";
+  document.getElementById(more).style.display = "block";
+  var x = document.getElementsByClassName('geom-table-icon');
+  for(var i = 0; i < x.length; i++){
+    x[i].style.display = "none";
+  }
+  
+}
+</script>

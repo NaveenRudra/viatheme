@@ -1,0 +1,387 @@
+{%- assign product = all_products[section.settings.featured_product] -%}
+
+{% if product == empty %}
+  {%- assign section_onboarding = true -%}
+{% endif %}
+
+<div class="product-template" id="ProductSection-{{ section.id }}" data-section-id="{{ section.id }}" data-ProductSection data-section-type="product-template" data-enable-history-state="true" data-enable-swatch="{% if section.settings.variant_style == 'dropdowns' %}false{% else %}true{% endif %}">
+  <section class="single-product" itemscope itemtype="http://schema.org/Product">
+    <meta itemprop="name" content="{{ product.title }}{% unless product.has_only_default_variant %} - {{ current_variant.title }}{% endunless %}">
+    <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+    <meta itemprop="image" content="{{ product.featured_image.src | img_url: '1024x1024' }}">
+    {% comment %}
+      Get first variant, or deep linked one
+    {% endcomment %}
+    {% assign current_variant = product.selected_or_first_available_variant %}
+    <div class="wrapper">
+
+      <div class="grid">
+        <div class="product-images thumbnails-placement-{{ section.settings.thumbnails_placement }}">
+          <div class="images-container">
+            {% unless section_onboarding %}
+              {% include 'product-featured-image' %}
+            {% else %}
+
+              <div class="featured {% if product.images.size == 1 %}full-width{% endif %}" id="ProductPhoto-{{ section.id }}" data-ProductPhoto>
+                <div class="product-image--slider" id="ProductImageSlider-{{ section.id }}" 
+                  data-zoom="{{ section.settings.product_featured_zoom_enable }}" 
+                  data-lightbox="{{ section.settings.product_featured_lightbox_enable }}"
+                  data-slider-enabled="{{ section.settings.enable_image_slider }}" 
+                  data-flickity-options='{
+                    "adaptiveHeight": true,
+                    "imagesLoaded": true,
+                    "lazyLoad": true,
+                    "wrapAround": true,
+                    "fullscreen": true,
+                    {% if product.images.size == 1 %}
+                    "pageDots": false,
+                    {% else %}
+                    "pageDots": {{ section.settings.show_dots }},
+                    {% endif %}
+                    "prevNextButtons": {{ section.settings.show_arrows }},
+                    "selectedAttraction": 0.15,
+                    "friction": 0.8
+                  }'
+                  data-ProductImageSlider>
+                    {%- for i in (1..3) -%}
+                      {%- assign placeholder_image_id = 'placeholder-' | append: i | append: '-' | append: section.id -%}
+                        <div class="product-image--cell" data-image-id="{{ placeholder_image_id }}" {% if forloop.first %}data-initial-image{% endif %}>
+                          <div id="ProductImageCellContainer-{{ placeholder_image_id }}" style="width: 100%">
+                            <a href="#" id="CardImageContainer-{{ placeholder_image_id }}" class="card__image-container" target="_blank">
+                              {%- assign product_placeholder = 'product-' | append: i -%}
+                              {{ product_placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+                            </a>
+                          </div>
+                        </div>
+                    {%- endfor -%}
+                </div>
+              </div>
+            {% endunless %}
+            
+            {% comment %}
+              Create thumbnails if we have more than one product image
+            {% endcomment %}
+            {%- unless product.images.size == 1 or section.settings.thumbnails_placement == 'hide' -%}
+              {%- if section.settings.thumbnails_placement contains 'side' -%}
+                {% unless section_onboarding %}
+                  {% include 'product-thumbnails' %}
+                {% else %}
+                  <div class="thumbnails" data-enable-group="{{ section.settings.enable_thumb_slider }}">
+                    <ul id="ProductThumbs-{{ section.id }}" data-ProductThumbs>
+                      {%- for i in (1..3) -%}
+                        {%- assign placeholder_image_id = 'placeholder-' | append: i | append: '-' | append: section.id -%}
+                        <li>
+                          <a href="#" class="product-single__thumbnail--{{ section.id }} {% if forloop.first %}active{% endif %}" data-image-id="{{ placeholder_image_id }}">
+                            {%- assign product_placeholder = 'product-' | append: i -%}
+                            {{ product_placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+                          </a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                {% endunless %}
+              {%- endif -%}
+
+              {% unless section_onboarding %}
+                {% include 'product-thumbnails-slider' %}
+              {% else %}
+                <div class="product-thumb--slider" id="ProductThumbsSlider-{{ section.id }}"
+                  data-ProductThumbsSlider
+                  data-slider-placement="{{ section.settings.thumbnails_placement }}"
+                  data-slider-enabled="{{ section.settings.enable_thumb_slider }}" 
+                  data-flickity-options='{
+                    "imagesLoaded": true,
+                    "lazyLoad": true,
+                    "pageDots": false,
+                    "groupCells": true,
+                    "accessibility": false,
+                    "asNavFor": "#ProductImageSlider-{{ section.id }}" 
+                  }'>
+                  {%- for i in (1..3) -%}
+                    {%- assign placeholder_image_id = 'placeholder-' | append: i | append: '-' | append: section.id -%}
+                    <div class="product-thumb--cell" data-image-id="{{ placeholder_image_id }}" {% if forloop.first %}data-initial-image{% endif %}>
+                      <a href="#">
+                        {%- assign product_placeholder = 'product-' | append: i -%}
+                        {{ product_placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+                      </a>
+                    </div>
+                  {%- endfor -%}
+                </div>
+              {% endunless %}
+            {%- endunless -%}
+          </div>
+        </div>
+
+        <aside class="product-aside">
+          <div class="purchase-box {% if section.settings.product_box_padding %}padding-box{% endif %}" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+            <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+            <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+
+            {% comment %}
+              ID addToCartForm is a selector for the ajax cart plugin
+            {% endcomment %}
+            <div id="AddToCartForm-{{ section.id }}" data-AddToCartForm class="form-vertical product-form product-form-{{ section.id }}" {% if section.settings.show_payment_button %}data-dynamic-checkout="true"{% endif %} data-section="{{ section.id }}">
+              {%- unless section_onboarding -%}
+                {% include 'product-form' %}
+              {%- else -%}
+                <div class="product-title">
+                  <h1 itemprop="name">{{ 'homepage.onboarding.product_title' | t }}</h1>
+                  {% if section.settings.show_vendors %}
+                    <span class="vendor">{{ 'homepage.onboarding.product_vendor' | t }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="selection-wrapper price product-single__price-{{ section.id }}">
+                  <span class="money" id="ProductPrice-{{ section.id }}" data-ProductPrice itemprop="price" content="{{ 1999 | money_without_currency | remove: ',' }}">{{ 1999 | money }}</span>
+                </div>
+
+                {% if section.settings.product_quantity_enable %}
+                  <div class="selection-wrapper variant js">
+                    {% include 'quantity-selector' %}
+                  </div>
+                {% else %}
+                  {%- assign cart_buttons_margin = 'cart_buttons__margin' -%}
+                {% endif %}
+
+                <div class="cart-buttons {% if cart_buttons_margin %}{{ cart_buttons_margin }}{% endif %}">
+
+                  <div class="button-wrapper default-cart-button">
+                    <button type="submit" name="add" id="AddToCart-{{ section.id }}" data-AddToCart class="default-cart-button__button">
+                      <span id="AddToCartText-{{ section.id }}" data-AddToCartText>{{ 'products.product.add_to_cart' | t }}</span>
+                    </button>
+                  </div>
+                </div>
+              {%- endunless -%}
+            </div>
+          </div>
+
+          {% if section.settings.trust_badge %}
+            <div class="trust-badge">
+              {% if section.settings.trust_badge %}
+                {%- assign image = section.settings.trust_badge -%}
+                {% assign image_widths = '295,394,590,700,800,1000,1200,1500,1800,2000,2400' %}
+                {% include 'theme-rias' %}
+                <img class="trust-badge--image lazyload"
+                  src="{{ image | img_url: '295x' }}"
+                  style="max-width: {{ image.width }}px;"
+                  data-src="{{ image_url_pattern }}"
+                  data-widths="[{{ image_widths }}]"
+                  data-aspectratio="{{ image.aspect_ratio }}"
+                  data-sizes="auto"
+                  alt="{{ image.alt | escape }}">
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {%- assign description_parts = product.description | split: '<!-- split -->' -%}
+          <div class="description rte" itemprop="description">
+            {{ description_parts | first }}
+          </div>
+          {% if section.settings.show_share_buttons %}
+            {% include 'social-share' %}
+          {% endif %}
+        </aside>
+      </div>
+
+      {%- if description_parts.size > 1 -%}
+        <div class="additional-description">
+          {%- for description_part in description_parts -%}
+            {%- unless forloop.first -%}
+              {{ description_part }}
+            {%- endunless -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </section>
+
+</div>
+
+{% unless product.empty? %}
+  <script type="application/json" id="ProductJson-{{ section.id }}">
+    {{ product | json }}
+  </script>
+{% endunless %}
+
+{%- if section.settings.size_guide_page != blank -%}
+<div id="product-size-guide-content-{{ section.id }}" class="popup-page mfp-hide">
+  <div class="rte">{{ pages[section.settings.size_guide_page].content }}</div>
+</div>
+{%- endif -%}
+
+{% schema %}
+  {
+    "name": "Featured product",
+    "class": "index-section index-section--featured-product",
+    "settings": [
+      {
+        "type": "product",
+        "id": "featured_product",
+        "label": "Product"
+      },
+      {
+        "type": "header",
+        "content": "Product form settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_vendors",
+        "label": "Show vendor",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "variant_style",
+        "label": "Product variant style",
+        "options": [
+          {
+            "value": "dropdowns",
+            "label": "Dropdowns"
+          },
+          {
+            "value": "buttons",
+            "label": "Buttons"
+          },
+          {
+            "value": "swatches",
+            "label": "Swatches"
+          }
+        ],
+        "default": "dropdowns"
+      },
+      {
+        "type": "checkbox",
+        "id": "variant_swatch_images",
+        "label": "Show swatch images",
+        "info": "Upload custom swatch images. [Learn more](https://help.stylehatch.com/article/335-product-color-swatches)",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "variant_swatch_shape",
+        "label": "Swatch shape",
+        "options": [
+          {
+            "value": "circle",
+            "label": "Circle"
+          },
+          {
+            "value": "square",
+            "label": "Square"
+          }
+        ],
+        "default": "circle"
+      },
+      {
+        "type": "page",
+        "id": "size_guide_page",
+        "label": "Size guide content"
+      },
+      {
+        "type": "checkbox",
+        "id": "product_quantity_enable",
+        "label": "Show quantity selector",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_payment_button",
+        "label": "Show dynamic checkout button",
+        "info": "Lets customers check out directly using a familiar payment method. [Learn more](https://help.shopify.com/manual/using-themes/change-the-layout/dynamic-checkout)",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "product_box_padding",
+        "label": "Show product details background",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Image settings"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_image_slider",
+        "label": "Enable image slider",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_dots",
+        "label": "Show slider dots",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_arrows",
+        "label": "Show previous and next arrows",
+        "default": false
+      },
+      {
+        "type": "select",
+        "id": "thumbnails_placement",
+        "label": "Thumbnails placement",
+        "options": [
+          {
+            "value": "side--left",
+            "label": "Left"
+          },
+          {
+            "value": "side",
+            "label": "Right"
+          },
+          {
+            "value": "below",
+            "label": "Below"
+          },
+          {
+            "value": "hide",
+            "label": "Hide"
+          }
+        ],
+        "default": "side"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_thumb_slider",
+        "label": "Group thumbnails",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "product_featured_zoom_enable",
+        "label": "Enable zoom",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "product_featured_lightbox_enable",
+        "label": "Enable lightbox",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Additional options"
+      },
+      {
+        "type": "image_picker",
+        "id": "trust_badge",
+        "label": "Checkout badge image"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_share_buttons",
+        "label": "Show social sharing buttons",
+        "default": true
+      }
+    ],
+    "presets": [
+      {
+        "name": "Featured product",
+        "category": "Product"
+      }
+    ]
+  }
+{% endschema %}

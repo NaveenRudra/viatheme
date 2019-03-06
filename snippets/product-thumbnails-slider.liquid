@@ -1,0 +1,39 @@
+<div class="product-thumb--slider" id="ProductThumbsSlider-{{ section.id }}"
+  data-ProductThumbsSlider
+  data-slider-placement="{{ section.settings.thumbnails_placement }}"
+  data-slider-enabled="{{ section.settings.enable_thumb_slider }}" 
+  data-flickity-options='{
+    "imagesLoaded": true,
+    "lazyLoad": true,
+    "pageDots": false,
+    "groupCells": true,
+    "asNavFor": "#ProductImageSlider-{{ section.id }}" 
+  }'>
+  {%- for image in product.images -%}
+    {%- assign image_width = image.width | append: 'x' -%}
+    {%- assign image_highresolution = image | img_url: image_width -%}
+    {%- assign active_image = current_variant.featured_image | default: product.featured_image -%}
+    <div class="product-thumb--cell" data-image-id="{{ image.id }}" {% if image == active_image %}data-initial-image{% endif %}>
+      <a href="{{ image_highresolution }}">
+        {%- assign image_widths = '85,100,200,295,394,590,720,800' -%}
+        {%- include 'theme-rias' -%}
+        <img class="lazyload"
+            src="{{ image | img_url: '100x' }}"
+            data-id="{{ image.id }}"
+            data-section-id="{{ section.id }}"
+            data-default="{{ image | img_url: '394x' }}"
+            data-src="{{ image_url_pattern }}"
+            data-src-pattern="{{ image_url_pattern }}"
+            data-widths="[{{ image_widths }}]"
+            data-aspectratio="{{ image.aspect_ratio }}"
+            data-sizes="auto"
+            data-position="{{ forloop.index0 }}"
+            data-max-width="{{ image.width }}"
+            alt="{{ image.alt | escape }}">
+        <noscript>
+          <img src="{{ image | img_url: '100x' }}" alt="{{ image.alt | escape }}">
+        </noscript>
+      </a>
+    </div>
+  {%- endfor -%}
+</div>

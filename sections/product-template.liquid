@@ -1,0 +1,404 @@
+<div class="product-template" id="ProductSection-{{ section.id }}" data-section-id="{{ section.id }}" data-ProductSection data-section-type="product-template" data-enable-history-state="true" data-enable-swatch="{% if section.settings.variant_style == 'dropdowns' %}false{% else %}true{% endif %}">
+  <section class="single-product" itemscope itemtype="http://schema.org/Product">
+    <meta itemprop="name" content="{{ product.title }}{% unless product.has_only_default_variant %} - {{ current_variant.title }}{% endunless %}">
+    <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+    <meta itemprop="image" content="{{ product.featured_image.src | img_url: '1024x1024' }}">
+    {% comment %}
+      Get first variant, or deep linked one
+    {% endcomment %}
+    {% assign current_variant = product.selected_or_first_available_variant %}
+    <div class="wrapper">
+
+      <header class="content-util">
+      {% include 'breadcrumb' %}
+      {% include 'social-icons' %}
+      </header>
+
+      <header class="product-header">
+        <div class="product-jump-container">
+          {% comment %}
+            If the user is on a collection product page (ie with /collections/collection-handle/products/product-handle)
+            in the URL, we can show next/previous links to other products in the collection.
+          {% endcomment %}
+          {% if collection and section.settings.show_product_jump %}
+            {% if collection.previous_product or collection.next_product %}
+              <ul class="product-jump">
+
+              {% if collection.previous_product %}
+                {% capture prev_url %}{{ collection.previous_product}}#content{% endcapture %}
+                <li class="previous">
+                  {{ 'products.general.previous_product_html' | t | link_to: prev_url }}
+                </li>
+              {% endif %}
+
+              {% if collection.next_product %}
+                {% capture next_url %}{{ collection.next_product}}#content{% endcapture %}
+                <li class="next">
+                  {{ 'products.general.next_product_html' | t | link_to: next_url }}
+                </li>
+              {% endif %}
+
+              </ul>
+            {% endif %}
+          {% endif %}
+        </div>
+
+      </header>
+
+      <div class="grid">
+        <div class="product-images thumbnails-placement-{{ section.settings.thumbnails_placement }}">
+          <div class="images-container">
+            {% include 'product-featured-image' %}
+
+            {%- comment -%}
+              Create thumbnails if there is more than one product image
+            {%- endcomment -%}
+            {%- unless product.images.size == 1 or section.settings.thumbnails_placement == 'hide' -%}
+              {%- if section.settings.thumbnails_placement contains 'side' -%}
+                {% include 'product-thumbnails' %}
+              {%- endif -%}
+
+              {% include 'product-thumbnails-slider' %}
+            {%- endunless -%}
+          </div>
+        </div>
+
+        <aside class="product-aside">
+          <div class="purchase-box {% if section.settings.product_box_padding %}padding-box{% endif %}" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+            <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+            <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+
+            {% comment %}
+              ID addToCartForm is a selector for the ajax cart plugin
+            {% endcomment %}
+            <div id="AddToCartForm-{{ section.id }}" data-AddToCartForm class="form-vertical product-form product-form-{{ section.id }}" {% if section.settings.show_payment_button %}data-dynamic-checkout="true"{% endif %} data-section="{{ section.id }}">
+              {% include 'product-form' %}
+            </div>
+          </div>
+
+          {% if section.settings.trust_badge %}
+            <div class="trust-badge">
+              {% if section.settings.trust_badge %}
+                {%- assign image = section.settings.trust_badge -%}
+                {% assign image_widths = '295,394,590,700,800,1000,1200,1500,1800,2000,2400' %}
+                {% include 'theme-rias' %}
+                <img class="trust-badge--image lazyload"
+                  src="{{ image | img_url: '295x' }}"
+                  style="max-width: {{ image.width }}px;"
+                  data-src="{{ image_url_pattern }}"
+                  data-widths="[{{ image_widths }}]"
+                  data-aspectratio="{{ image.aspect_ratio }}"
+                  data-sizes="auto"
+                  alt="{{ image.alt | escape }}">
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {%- assign description_parts = product.description | split: '<!-- split -->' -%}
+          <div class="description rte" itemprop="description">
+            {{ description_parts | first }}
+          </div>
+          {% if section.settings.show_share_buttons %}
+            {% include 'social-share' %}
+          {% endif %}
+        </aside>
+      </div>
+
+      {%- if description_parts.size > 1 -%}
+        <div class="additional-description rte">
+          {%- for description_part in description_parts -%}
+            {%- unless forloop.first -%}
+              {{ description_part }}
+            {%- endunless -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%}
+        Optional place to add product reviews snippets from Shopify Apps
+        - Shopify Product Reviews
+        - YOTPO
+        - Judge.me
+      {%- endcomment -%}
+      <div class="product-reviews"></div>
+
+    </div>
+  </section>
+
+  {% comment %}
+    Related products
+  {% endcomment %}
+  {% comment %} -- Taylor (with Cranktank) Comment Starts Here
+  {% for block in section.blocks %}
+    <div class="product-block-container" {{ block.shopify_attributes }}>
+      {% case block.type %}
+        {% when 'related_products' %}
+          <div class="block-container">
+            {% include 'related-products' %}
+          </div>
+
+        {% when 'product_collection'}
+          {%- assign product_collection_count = '4' -%}
+          {%- assign collection_count = '4' -%}
+          <div class="simple-collection layout-{{ collection_count }}">
+            <div class="wrapper">
+              <header>
+                {% if block.settings.title != blank %}
+                  <h4>{{ block.settings.title | escape }}</h4>
+                {% endif %}
+                {% if block.settings.button_link != blank and block.settings.button_label != blank %}
+                  <a href="{{ block.settings.button_link }}" class="button outline">{{ block.settings.button_label | escape }}</a>
+                {% endif %}
+              </header>
+              <div class="product-container">
+                {%- assign collection = collections[block.settings.collection] -%}
+                {%- assign product_limit = collection_count -%}
+                {% for product in collection.products limit: product_limit  %}
+                  {% include 'product-grid-item' %}
+                {% else %}
+                  {% for i in (1..product_limit) %}
+                    {% include 'placeholder-product-grid-item' %}
+                  {% endfor %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+      {% endcase %}
+    </div>
+  {% endfor %}
+  
+  Taylor comment ends here
+  {% endcomment %}
+
+</div>
+{% unless product.empty? %}
+  <script type="application/json" id="ProductJson-{{ section.id }}">
+    {{ product | json }}
+  </script>
+{% endunless %}
+
+{%- if section.settings.size_guide_page != blank -%}
+<div id="product-size-guide-content-{{ section.id }}" class="popup-page mfp-hide">
+  <div class="rte">{{ pages[section.settings.size_guide_page].content }}</div>
+</div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product pages",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product form settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendors",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "variant_style",
+      "label": "Product variant style",
+      "options": [
+        {
+          "value": "dropdowns",
+          "label": "Dropdowns"
+        },
+        {
+          "value": "buttons",
+          "label": "Buttons"
+        },
+        {
+          "value": "swatches",
+          "label": "Swatches"
+        }
+      ],
+      "default": "dropdowns"
+    },
+    {
+      "type": "checkbox",
+      "id": "variant_swatch_images",
+      "label": "Show swatch images",
+      "info": "Upload custom swatch images. [Learn more](https://help.stylehatch.com/article/335-product-color-swatches)",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "variant_swatch_shape",
+      "label": "Swatch shape",
+      "options": [
+        {
+          "value": "circle",
+          "label": "Circle"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        }
+      ],
+      "default": "circle"
+    },
+    {
+      "type": "page",
+      "id": "size_guide_page",
+      "label": "Size guide content"
+    },
+    {
+      "type": "checkbox",
+      "id": "product_quantity_enable",
+      "label": "Show quantity selector",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_button",
+      "label": "Show dynamic checkout button",
+      "info": "Lets customers check out directly using a familiar payment method. [Learn more](https://help.shopify.com/manual/using-themes/change-the-layout/dynamic-checkout)",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "product_box_padding",
+      "label": "Show product details background",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Image settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_image_slider",
+      "label": "Enable image slider",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show slider dots",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show previous and next arrows",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "thumbnails_placement",
+      "label": "Thumbnails placement",
+      "options": [
+        {
+          "value": "side--left",
+          "label": "Left"
+        },
+        {
+          "value": "side",
+          "label": "Right"
+        },
+        {
+          "value": "below",
+          "label": "Below"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ],
+      "default": "side"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_thumb_slider",
+      "label": "Group thumbnails",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "product_featured_zoom_enable",
+      "label": "Enable zoom",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "product_featured_lightbox_enable",
+      "label": "Enable lightbox",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Additional options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_jump",
+      "label": "Show previous and next links",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "trust_badge",
+      "label": "Checkout badge image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_share_buttons",
+      "label": "Show social sharing buttons",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "related_products",
+      "name": "Related products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Related Products"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "View more"
+        }
+      ]
+    },
+    {
+      "type": "product_collection",
+      "name": "Product Collection",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Simple collection"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "View more"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "id": "collection",
+          "type": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

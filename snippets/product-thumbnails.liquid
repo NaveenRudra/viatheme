@@ -1,0 +1,31 @@
+<div class="thumbnails" data-enable-group="{{ section.settings.enable_thumb_slider }}">
+  <ul id="ProductThumbs-{{ section.id }}" data-ProductThumbs>
+
+    {% for image in product.images %}
+      {%- assign image_width = image.width | append: 'x' -%}
+      {%- assign image_highresolution = image | img_url: image_width -%}
+      {%- assign active_image = current_variant.featured_image | default: product.featured_image -%}
+      <li>
+        <a href="{{ image_highresolution }}" class="product-single__thumbnail--{{ section.id }} {% if image == active_image %}active{% endif %}" data-image-id="{{ image.id }}">
+          {% assign image_widths = '85,100,200,295,394,590,720,800' %}
+          {% include 'theme-rias' %}
+          <img class="lazyload"
+            src="{{ image | img_url: '100x' }}"
+            data-default="{{ image | img_url: '394x' }}"
+            data-src="{{ image_url_pattern }}"
+            data-src-pattern="{{ image_url_pattern }}"
+            data-widths="[{{ image_widths }}]"
+            data-aspectratio="{{ image.aspect_ratio }}"
+            data-sizes="auto"
+            data-position="{{ forloop.index0 }}"
+            data-max-width="{{ image.width }}"
+            alt="{{ image.alt | escape }}">
+          <noscript>
+            <img src="{{ image | img_url: '100x' }}" alt="{{ image.alt | escape }}">
+          </noscript>
+        </a>
+      </li>
+    {% endfor %}
+
+  </ul>
+</div>
